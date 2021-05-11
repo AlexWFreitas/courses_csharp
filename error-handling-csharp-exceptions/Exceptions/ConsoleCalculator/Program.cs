@@ -17,8 +17,16 @@ namespace ConsoleCalculator
             string operation = ReadLine();
 
             var calculator = new Calculator();
-            int result = calculator.Calculate(number1, number2, operation);
-            DisplayResult(result);
+            
+            try
+            { 
+                int result = calculator.Calculate(number1, number2, operation);
+                DisplayResult(result);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Sorry, something went wrong. \n{ex}");
+            }
 
             WriteLine("\nPress enter to exit.");
             ReadLine();
