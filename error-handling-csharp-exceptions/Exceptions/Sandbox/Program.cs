@@ -23,7 +23,7 @@ namespace Sandbox
             catch (Exception ex)
             {
                 Log(ex);
-                throw;
+                throw ex;
             }
         }
 

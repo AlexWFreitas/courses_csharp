@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31205.134
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sandbox", "Sandbox\Sandbox.csproj", "{83FB740E-3B01-46AC-B963-1B0C6ABC4517}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sandbox", "Sandbox\Sandbox.csproj", "{83FB740E-3B01-46AC-B963-1B0C6ABC4517}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleCalculator", "ConsoleCalculator\ConsoleCalculator.csproj", "{87C5F0DF-C737-42CE-84F9-79F60F967D1D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{83FB740E-3B01-46AC-B963-1B0C6ABC4517}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{83FB740E-3B01-46AC-B963-1B0C6ABC4517}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{83FB740E-3B01-46AC-B963-1B0C6ABC4517}.Release|Any CPU.Build.0 = Release|Any CPU
+		{87C5F0DF-C737-42CE-84F9-79F60F967D1D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{87C5F0DF-C737-42CE-84F9-79F60F967D1D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{87C5F0DF-C737-42CE-84F9-79F60F967D1D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{87C5F0DF-C737-42CE-84F9-79F60F967D1D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
