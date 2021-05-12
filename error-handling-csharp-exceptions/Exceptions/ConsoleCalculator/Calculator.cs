@@ -11,7 +11,18 @@ namespace ConsoleCalculator
 
             if (nonNullOperation == "/")
             {
+                try 
+                { 
                 return Divide(number1, number2);
+                }
+                catch (DivideByZeroException ex)
+                {
+                    // Log.Error(ex);
+                    // throw;
+
+                    throw new ArithmeticException("An error occurred during calculation.", 
+                        ex);
+                }
             }
             else
             {
