@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleCalculator.Tests.MST
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleCalculator.Tests.NUnit", "ConsoleCalculator.Tests.NUnit\ConsoleCalculator.Tests.NUnit.csproj", "{7213BDED-F03F-47E3-97BE-4385E64E249A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleCalculator.Tests.XUnit", "ConsoleCalculator.Tests.XUnit\ConsoleCalculator.Tests.XUnit.csproj", "{F94758D5-6A37-4DB7-A326-2DA21058FDDD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{7213BDED-F03F-47E3-97BE-4385E64E249A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7213BDED-F03F-47E3-97BE-4385E64E249A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7213BDED-F03F-47E3-97BE-4385E64E249A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F94758D5-6A37-4DB7-A326-2DA21058FDDD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F94758D5-6A37-4DB7-A326-2DA21058FDDD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F94758D5-6A37-4DB7-A326-2DA21058FDDD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F94758D5-6A37-4DB7-A326-2DA21058FDDD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -4,11 +4,6 @@ namespace ConsoleCalculator.Tests.NUnit
 {
     public class CalculatorShould
     {
-        [SetUp]
-        public void Setup()
-        {
-        }
-
         [Test]
         public void ThrowWhenUnsupportedOperation()
         {
