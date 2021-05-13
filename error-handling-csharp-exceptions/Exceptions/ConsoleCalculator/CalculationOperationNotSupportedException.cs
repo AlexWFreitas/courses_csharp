@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ConsoleCalculator
 {
-    class CalculationOperationNotSupportedException : CalculationException
+    public class CalculationOperationNotSupportedException : CalculationException
     {
         public string Operation { get; }
 

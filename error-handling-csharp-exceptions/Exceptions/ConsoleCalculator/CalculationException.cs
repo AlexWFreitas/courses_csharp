@@ -2,7 +2,7 @@
 
 namespace ConsoleCalculator
 {
-    class CalculationException : Exception
+    public class CalculationException : Exception
     {
         private static readonly string DefaultMessage = "An error occurred during calculation. Ensure" +
             " that the operator is supported and that the values are within valid ranges for the requested operation.";
