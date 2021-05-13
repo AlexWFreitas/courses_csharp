@@ -15,19 +15,14 @@ namespace ConsoleCalculator
                 { 
                 return Divide(number1, number2);
                 }
-                catch (DivideByZeroException ex)
+                catch (ArithmeticException ex)
                 {
-                    // Log.Error(ex);
-                    // throw;
-
-                    throw new ArithmeticException("An error occurred during calculation.", 
-                        ex);
+                    throw new CalculationException("An error occurred during division.", ex);
                 }
             }
             else
             {
-                throw new ArgumentOutOfRangeException(nameof(operation), 
-                    "The mathematical operator is not supported.");
+                throw new CalculationOperationNotSupportedException(operation);
             }
         }
 

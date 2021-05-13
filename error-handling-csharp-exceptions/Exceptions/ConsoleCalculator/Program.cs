@@ -1,5 +1,4 @@
 ﻿using System;
-using static System.Console;
 
 namespace ConsoleCalculator
 {
@@ -11,14 +10,14 @@ namespace ConsoleCalculator
             currentAppDomain.UnhandledException += 
                 new UnhandledExceptionEventHandler(HandleException);
 
-            WriteLine("Enter first number");
-            int number1 = int.Parse(ReadLine());
+            Console.WriteLine("Enter first number");
+            int number1 = int.Parse(Console.ReadLine());
 
-            WriteLine("Enter second number");
-            int number2 = int.Parse(ReadLine());
+            Console.WriteLine("Enter second number");
+            int number2 = int.Parse(Console.ReadLine());
 
-            WriteLine("Enter operator");
-            string operation = ReadLine();
+            Console.WriteLine("Enter operator");
+            string operation = Console.ReadLine();
 
             var calculator = new Calculator();
             
@@ -27,20 +26,15 @@ namespace ConsoleCalculator
                 int result = calculator.Calculate(number1, number2, operation);
                 DisplayResult(result);
             }
-            catch (ArgumentNullException ex) when (ex.ParamName == "operation")
+            catch (CalculationOperationNotSupportedException ex)
             {
-                // Log.Error(ex)
-                WriteLine($"Operation was not provided. \n{ex}");
+                // Log.error(ex);
+                Console.WriteLine(ex);
             }
-            catch (ArgumentNullException ex)
+            catch (CalculationException ex)
             {
-                // Log.Error(ex)
-                WriteLine($"An argument was null. \n{ex}");
-            }
-            catch (ArgumentOutOfRangeException ex)
-            {
-                // Log.Error(ex)
-                WriteLine($"Operation is not supported. \n{ex}");
+                // Log.error(ex);
+                Console.WriteLine(ex);
             }
             catch (Exception ex)
             {
@@ -48,11 +42,11 @@ namespace ConsoleCalculator
             }
             finally
             {
-                WriteLine("...finally...");
+                Console.WriteLine("...finally...");
             }
 
-            WriteLine("\nPress enter to exit.");
-            ReadLine();
+            Console.WriteLine("\nPress enter to exit.");
+            Console.ReadLine();
         }
 
         private static void HandleException(object sender, UnhandledExceptionEventArgs e)
@@ -62,7 +56,7 @@ namespace ConsoleCalculator
 
         private static void DisplayResult(int result)
         {
-            WriteLine($"Result is: {result}");
+            Console.WriteLine($"Result is: {result}");
         }
     }
 }
