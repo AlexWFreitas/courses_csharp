@@ -31,7 +31,7 @@ namespace StockAnalyzer.Windows
             {
                 BeforeLoadingStockData();
 
-                await Task.Run(() => { 
+                var taskResult = await Task.Run(() => { 
                     var lines = File.ReadAllLines("StockPrices_Small.csv");
 
                     var data = new List<StockPrice>();
@@ -43,8 +43,10 @@ namespace StockAnalyzer.Windows
                         data.Add(price);
                     }
 
-                    Dispatcher.Invoke(() => Stocks.ItemsSource = data.Where(sp => sp.Identifier == StockIdentifier.Text));
+                    return data;
                 });
+
+                Stocks.ItemsSource = taskResult.Where(sp => sp.Identifier == StockIdentifier.Text);
             }
             catch (Exception ex)
             {
