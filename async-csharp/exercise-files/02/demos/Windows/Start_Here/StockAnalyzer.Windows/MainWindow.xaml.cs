@@ -4,6 +4,8 @@ using StockAnalyzer.Core.Domain;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading;
@@ -23,23 +25,33 @@ namespace StockAnalyzer.Windows
             InitializeComponent();
         }
 
-        private async void Search_Click(object sender, RoutedEventArgs e)
+        private void Search_Click(object sender, RoutedEventArgs e)
         {
-            BeforeLoadingStockData();
-
             try
             {
-                var getStocksTask = GetStocks();
+                BeforeLoadingStockData();
 
-                await getStocksTask;
+                var lines = File.ReadAllLines("StockPrices_Small.csv");
 
+                var data = new List<StockPrice>();
+
+                foreach (var line in lines.Skip(1))
+                {
+                    var price = StockPrice.FromCSV(line);
+
+                    data.Add(price);
+                }
+
+                Stocks.ItemsSource = data.Where(sp => sp.Identifier == StockIdentifier.Text);
             }
             catch (Exception ex)
             {
                 Notes.Text = ex.Message;
             }
-
-            AfterLoadingStockData();
+            finally
+            { 
+                AfterLoadingStockData();
+            }
         }
 
         private async Task GetStocks()
@@ -50,7 +62,6 @@ namespace StockAnalyzer.Windows
 
                 var responseTask = store.GetStockPrices(StockIdentifier.Text);
 
-                
                 var data = await responseTask;
 
                 /* Dois cavaleiros do Debug
@@ -60,7 +71,7 @@ namespace StockAnalyzer.Windows
 
                 Stocks.ItemsSource = data;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
