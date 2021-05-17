@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Net;
 using System.Net.Http;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Navigation;
 
@@ -22,28 +23,47 @@ namespace StockAnalyzer.Windows
             InitializeComponent();
         }
 
-
-
         private async void Search_Click(object sender, RoutedEventArgs e)
         {
             BeforeLoadingStockData();
+
+            try
+            {
+                var getStocksTask = GetStocks();
+
+                await getStocksTask;
+
+            }
+            catch (Exception ex)
+            {
+                Notes.Text = ex.Message;
+            }
+
+            AfterLoadingStockData();
+        }
+
+        private async Task GetStocks()
+        {
             try
             {
                 var store = new DataStore();
 
                 var responseTask = store.GetStockPrices(StockIdentifier.Text);
 
+                
                 var data = await responseTask;
+
+                /* Dois cavaleiros do Debug
+                var data2 = responseTask.Result;
+                var data3 = responseTask;
+                */
 
                 Stocks.ItemsSource = data;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                Notes.Text = ex.Message;
+                throw;
             }
-
-            AfterLoadingStockData();
-
         }
 
 
