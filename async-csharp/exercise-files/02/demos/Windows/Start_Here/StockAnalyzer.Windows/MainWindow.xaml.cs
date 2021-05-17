@@ -25,24 +25,26 @@ namespace StockAnalyzer.Windows
             InitializeComponent();
         }
 
-        private void Search_Click(object sender, RoutedEventArgs e)
+        private async void Search_Click(object sender, RoutedEventArgs e)
         {
             try
             {
                 BeforeLoadingStockData();
 
-                var lines = File.ReadAllLines("StockPrices_Small.csv");
+                await Task.Run(() => { 
+                    var lines = File.ReadAllLines("StockPrices_Small.csv");
 
-                var data = new List<StockPrice>();
+                    var data = new List<StockPrice>();
 
-                foreach (var line in lines.Skip(1))
-                {
-                    var price = StockPrice.FromCSV(line);
+                    foreach (var line in lines.Skip(1))
+                    {
+                        var price = StockPrice.FromCSV(line);
 
-                    data.Add(price);
-                }
+                        data.Add(price);
+                    }
 
-                Stocks.ItemsSource = data.Where(sp => sp.Identifier == StockIdentifier.Text);
+                    Dispatcher.Invoke(() => Stocks.ItemsSource = data.Where(sp => sp.Identifier == StockIdentifier.Text));
+                });
             }
             catch (Exception ex)
             {
