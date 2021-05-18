@@ -33,29 +33,64 @@ namespace StockAnalyzer.Windows
 
                 var loadLinesTask = Task.Run(() =>
                 {
-                    var lines = File.ReadAllLines("StockPrices_Small.csv");
+                    try 
+                    { 
+                        var lines = File.ReadAllLines("StockPrices_Small.csv");
 
-                    return lines;
+                        return lines;
+                    }
+                    catch (Exception)
+                    {
+                        throw;
+                    }
+
                 });
 
                 var processStocksTask = loadLinesTask.ContinueWith((completedTask) =>
                 {
-                    var data = new List<StockPrice>();
-
-                    foreach (var line in completedTask.Result.Skip(1))
+                    try
                     {
-                        var price = StockPrice.FromCSV(line);
+                        var data = new List<StockPrice>();
 
-                        data.Add(price);
+                        foreach (var line in completedTask.Result.Skip(1))
+                        {
+                            var price = StockPrice.FromCSV(line);
+
+                            data.Add(price);
+                        }
+
+                        var x = Dispatcher.Invoke(() => { return StockIdentifier.Text; });
+
+
+                        // Código relacionado a Exception Swallow com ContinueWith
+                        // Problema com defex
+                        /* 
+                        var dataFiltered3 = data.Where(sp => sp.Identifier == x).ToList();
+
+                        var dataFiltered = Dispatcher.Invoke(() => { 
+                                   return data.Where(sp => sp.Identifier == 
+                                   StockIdentifier.Text).ToList(); });
+                        
+
+                        if (!dataFiltered.Any())
+                        {
+                            throw new Exception($"Could not find any stocks.");
+                        }
+                        */
+
+                        Dispatcher.Invoke(() =>
+                        {
+                            Stocks.ItemsSource = data.Where(sp => sp.Identifier == StockIdentifier.Text);
+                        });
                     }
-
-                    Dispatcher.Invoke(() =>
+                    catch (Exception)
                     {
-                        Stocks.ItemsSource = data.Where(sp => sp.Identifier == StockIdentifier.Text);
-                    });
+                        throw;
+                    }
                 });
 
-                var processStocksTask2 = loadLinesTask.ContinueWith((completedTask) =>
+                // Código relacionado a teste de Thread de ContinueWith
+                /* var processStocksTask2 = loadLinesTask.ContinueWith((completedTask) =>
                 {
                     var data2 = new List<StockPrice>();
 
@@ -66,10 +101,11 @@ namespace StockAnalyzer.Windows
                         data2.Add(price);
                     }
                 });
+                */
 
                 processStocksTask.ContinueWith( _ => {
                     Dispatcher.Invoke(() => AfterLoadingStockData());
-                } );
+                });
             }
             catch (Exception ex)
             {
@@ -87,9 +123,12 @@ namespace StockAnalyzer.Windows
 
                 var data = await responseTask;
 
+
+
                 /* Dois cavaleiros do Debug
                 var data2 = responseTask.Result;
                 var data3 = responseTask;
+                var data4 = await responseTask;
                 */
 
                 Stocks.ItemsSource = data;
