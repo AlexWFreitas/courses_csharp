@@ -25,36 +25,43 @@ namespace StockAnalyzer.Windows
             InitializeComponent();
         }
 
-        private async void Search_Click(object sender, RoutedEventArgs e)
+        private void Search_Click(object sender, RoutedEventArgs e)
         {
             try
             {
                 BeforeLoadingStockData();
 
-                var taskResult = await Task.Run(() => { 
+                var loadLinesTask = Task.Run(() =>
+                {
                     var lines = File.ReadAllLines("StockPrices_Small.csv");
 
+                    return lines;
+                });
+
+                var processStocksTask = loadLinesTask.ContinueWith((completedTask) =>
+                {
                     var data = new List<StockPrice>();
 
-                    foreach (var line in lines.Skip(1))
+                    foreach (var line in completedTask.Result.Skip(1))
                     {
                         var price = StockPrice.FromCSV(line);
 
                         data.Add(price);
                     }
 
-                    return data;
+                    Dispatcher.Invoke(() =>
+                    {
+                        Stocks.ItemsSource = data.Where(sp => sp.Identifier == StockIdentifier.Text);
+                    });
                 });
 
-                Stocks.ItemsSource = taskResult.Where(sp => sp.Identifier == StockIdentifier.Text);
+                processStocksTask.ContinueWith( _ => {
+                    Dispatcher.Invoke(() => AfterLoadingStockData());
+                } );
             }
             catch (Exception ex)
             {
                 Notes.Text = ex.Message;
-            }
-            finally
-            { 
-                AfterLoadingStockData();
             }
         }
 
@@ -80,13 +87,6 @@ namespace StockAnalyzer.Windows
                 throw;
             }
         }
-
-
-
-
-
-
-
 
         private void BeforeLoadingStockData()
         {
