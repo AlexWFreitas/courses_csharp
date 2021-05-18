@@ -55,6 +55,18 @@ namespace StockAnalyzer.Windows
                     });
                 });
 
+                var processStocksTask2 = loadLinesTask.ContinueWith((completedTask) =>
+                {
+                    var data2 = new List<StockPrice>();
+
+                    foreach (var line in completedTask.Result.Skip(1))
+                    {
+                        var price = StockPrice.FromCSV(line);
+
+                        data2.Add(price);
+                    }
+                });
+
                 processStocksTask.ContinueWith( _ => {
                     Dispatcher.Invoke(() => AfterLoadingStockData());
                 } );
