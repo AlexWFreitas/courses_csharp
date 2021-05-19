@@ -55,16 +55,18 @@ namespace StockAnalyzer.Windows
                 var processStocksTask = loadLinesTask.ContinueWith( t => ProcessStocks(t), token, TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Current);
                 loadLinesTask.ContinueWith( t => LoadLineFail(t), TaskContinuationOptions.OnlyOnFaulted);
 
-                // Process Stocks Continuations
+                // Process Stocks - Continuations
                 var filterStocksTask = processStocksTask.ContinueWith( t => FilterStocks(t), token, TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Current);
 
-                // Filter Stocks Continuations
+                // Filter Stocks - Continuations
                 var updateStocksTask = filterStocksTask.ContinueWith(t => UpdateStocks(t), token, TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Current);
                 filterStocksTask.ContinueWith( t => FilterDataFail(t), TaskContinuationOptions.OnlyOnFaulted);
 
-                // Update Stocks Continuations
+                // Update Stocks - Continuations
                 // Removes loading animation, restores search button text, assigns null to cancellationTokenSource
                 updateStocksTask.ContinueWith( _ => AfterTaskCleanUp(), token, TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Current);
+
+
             }
             catch (Exception ex)
             {
