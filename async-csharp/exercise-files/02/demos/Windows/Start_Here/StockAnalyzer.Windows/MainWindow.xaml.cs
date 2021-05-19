@@ -43,7 +43,7 @@ namespace StockAnalyzer.Windows
 
                 Search.Content = "Cancel"; // Button text
 
-                // Starts the loading bar and StopwWatch
+                // Displays the loading bar and starts stop watch
                 BeforeLoadingStockData();
 
                 // Load Lines Task
@@ -51,14 +51,14 @@ namespace StockAnalyzer.Windows
 
                 // Load Lines - Continuations
                 var processStocksTask = loadLinesTask.ContinueWith( t => ProcessStocks(t), TaskContinuationOptions.OnlyOnRanToCompletion);
-                loadLinesTask.ContinueWith( t => loadLineFailed(t), TaskContinuationOptions.OnlyOnFaulted);
+                loadLinesTask.ContinueWith( t => LoadLineFail(t), TaskContinuationOptions.OnlyOnFaulted);
 
                 // Process Stocks Continuations
                 var filterStocksTask = processStocksTask.ContinueWith( t => FilterStocks(t), TaskContinuationOptions.OnlyOnRanToCompletion);
 
                 // Filter Stocks Continuations
                 var updateStocksTask = filterStocksTask.ContinueWith(t => UpdateStocks(t), TaskContinuationOptions.OnlyOnRanToCompletion);
-                filterStocksTask.ContinueWith( t => filterDataFail(t), TaskContinuationOptions.OnlyOnFaulted);
+                filterStocksTask.ContinueWith( t => FilterDataFail(t), TaskContinuationOptions.OnlyOnFaulted);
 
                 // Update Stocks Continuations
                 // Removes loading animation, restores search button text, assigns null to cancellationTokenSource
@@ -69,6 +69,8 @@ namespace StockAnalyzer.Windows
                 Notes.Text = ex.Message;
             }
         }
+
+        // Continuation Methods
 
         private void AfterTaskCleanUp()
         {
@@ -95,7 +97,7 @@ namespace StockAnalyzer.Windows
             return;
         }
 
-        private void filterDataFail(Task<List<StockPrice>> faultedTask)
+        private void FilterDataFail(Task<List<StockPrice>> faultedTask)
         {
             Dispatcher.Invoke(() =>
             {
@@ -103,8 +105,23 @@ namespace StockAnalyzer.Windows
                 Notes.Text = faultedTask.Exception.InnerException.Message;
             });
         }
+        private List<StockPrice> FilterStocks(Task<List<StockPrice>> completedTask)
+        {
+            var selectionText = Dispatcher.Invoke(() => { return StockIdentifier.Text; });
 
-        private void loadLineFailed(Task<List<string>> faultedTask)
+            var data = completedTask.Result;
+
+            var dataFilteredReadable = data.Where(sp => sp.Identifier == selectionText).ToList();
+
+            if (!dataFilteredReadable.Any())
+            {
+                throw new Exception($"Could not find any stocks.");
+            }
+
+            return data;
+        }
+
+        private void LoadLineFail(Task<List<string>> faultedTask)
         {
             Dispatcher.Invoke(() =>
             {
@@ -129,32 +146,6 @@ namespace StockAnalyzer.Windows
             return data;
         }
 
-        private List<StockPrice> FilterStocks(Task<List<StockPrice>> completedTask)
-        {
-            var selectionText = Dispatcher.Invoke(() => { return StockIdentifier.Text; });
-
-            var data = completedTask.Result;
-
-            var dataFilteredReadable = data.Where(sp => sp.Identifier == selectionText).ToList();
-
-            if (!dataFilteredReadable.Any())
-            {
-                throw new Exception($"Could not find any stocks.");
-            }
-
-            return data;
-        }
-
-        private void UpdateStocks(Task<List<StockPrice>> completedTask)
-        {
-            var data = completedTask.Result;
-
-            Dispatcher.Invoke(() =>
-            {
-                Stocks.ItemsSource = data.Where(sp => sp.Identifier == StockIdentifier.Text);
-            });
-        }
-
         private static Task<List<string>> SearchForStocks(CancellationToken cancellationToken)
         {
             var resultTask = Task.Run(async () =>
@@ -166,7 +157,7 @@ namespace StockAnalyzer.Windows
                     string line;
                     while ((line = await stream.ReadLineAsync()) != null)
                     {
-                        if(cancellationToken.IsCancellationRequested)
+                        if (cancellationToken.IsCancellationRequested)
                         {
                             break;
                         }
@@ -179,6 +170,17 @@ namespace StockAnalyzer.Windows
 
             return resultTask;
         }
+
+        private void UpdateStocks(Task<List<StockPrice>> completedTask)
+        {
+            var data = completedTask.Result;
+
+            Dispatcher.Invoke(() =>
+            {
+                Stocks.ItemsSource = data.Where(sp => sp.Identifier == StockIdentifier.Text);
+            });
+        }
+
 
         private async Task GetStocks()
         {
