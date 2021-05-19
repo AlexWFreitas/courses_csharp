@@ -19,6 +19,8 @@ namespace StockAnalyzer.Windows
     {
         private static string API_URL = "https://ps-async.fekberg.com/api/stocks";
         private Stopwatch stopwatch = new Stopwatch();
+        CancellationTokenSource cancellationTokenSource;
+        
 
         public MainWindow()
         {
@@ -27,78 +29,155 @@ namespace StockAnalyzer.Windows
 
         private void Search_Click(object sender, RoutedEventArgs e)
         {
+            // Cancels the current Search if already searching
+            if(cancellationTokenSource != null)
+            {
+                CancelSearchClick();
+                return;
+            }
+
             try
             {
+                // Instantiates a CancellationTokenSource object ( Means that the search is running )
+                cancellationTokenSource = new CancellationTokenSource(); 
+
+                Search.Content = "Cancel"; // Button text
+
+                // Starts the loading bar and StopwWatch
                 BeforeLoadingStockData();
 
-                var loadLinesTask = Task.Run(async () =>
-                {
-                    using(var stream = new StreamReader(File.OpenRead("StockPrices_Small.csv")))
-                    {
-                        var lines = new List<string>();
+                // Load Lines Task
+                Task<List<string>> loadLinesTask = SearchForStocks(cancellationTokenSource.Token);
 
-                        string line;
-                        while((line = await stream.ReadLineAsync()) != null)
-                        {
-                            lines.Add(line);
-                        }
+                // Load Lines - Continuations
+                var processStocksTask = loadLinesTask.ContinueWith( t => ProcessStocks(t), TaskContinuationOptions.OnlyOnRanToCompletion);
+                loadLinesTask.ContinueWith( t => loadLineFailed(t), TaskContinuationOptions.OnlyOnFaulted);
 
-                        return lines;
-                    }
-                });
+                // Process Stocks Continuations
+                var filterStocksTask = processStocksTask.ContinueWith( t => FilterStocks(t), TaskContinuationOptions.OnlyOnRanToCompletion);
 
-                loadLinesTask.ContinueWith(t =>
-                {
-                    Dispatcher.Invoke(() =>
-                    {
-                        AfterLoadingStockData();
-                        Notes.Text = t.Exception.InnerException.Message;
-                    });
-                }, TaskContinuationOptions.OnlyOnFaulted);
+                // Filter Stocks Continuations
+                var updateStocksTask = filterStocksTask.ContinueWith(t => UpdateStocks(t), TaskContinuationOptions.OnlyOnRanToCompletion);
+                filterStocksTask.ContinueWith( t => filterDataFail(t), TaskContinuationOptions.OnlyOnFaulted);
 
-                var processStocksTask = loadLinesTask.ContinueWith((completedTask) =>
-                {
-                    var data = new List<StockPrice>();
-
-                    foreach (var line in completedTask.Result.Skip(1))
-                    {
-                        var price = StockPrice.FromCSV(line);
-
-                        data.Add(price);
-                    }
-
-                    var selectionText = Dispatcher.Invoke(() => { return StockIdentifier.Text; });
-
-                    var dataFilteredReadable = data.Where(sp => sp.Identifier == selectionText).ToList();
-
-                    if (!dataFilteredReadable.Any())
-                    {
-                        throw new Exception($"Could not find any stocks.");
-                    }
-
-                    Dispatcher.Invoke(() =>
-                    {
-                        Stocks.ItemsSource = data.Where(sp => sp.Identifier == StockIdentifier.Text);
-                    });
-                }, TaskContinuationOptions.OnlyOnRanToCompletion);
-
-                processStocksTask.ContinueWith((t =>
-                {
-                    Dispatcher.Invoke(() => 
-                    {
-                        AfterLoadingStockData();
-                        Notes.Text = t.Exception.InnerException.Message;
-                    });
-                }), TaskContinuationOptions.OnlyOnFaulted);
-
-                processStocksTask.ContinueWith( a => {
-                    Dispatcher.Invoke(() => AfterLoadingStockData());
-                }, TaskContinuationOptions.OnlyOnRanToCompletion);
+                // Update Stocks Continuations
+                // Removes loading animation, restores search button text, assigns null to cancellationTokenSource
+                updateStocksTask.ContinueWith( _ => AfterTaskCleanUp(), TaskContinuationOptions.OnlyOnRanToCompletion);
             }
             catch (Exception ex)
             {
                 Notes.Text = ex.Message;
             }
+        }
+
+        private void AfterTaskCleanUp()
+        {
+            Dispatcher.Invoke(() =>
+            {
+                Search.Content = "Search";
+
+                cancellationTokenSource = null;
+
+                AfterLoadingStockData();
+            });
+        }
+
+        private void CancelSearchClick()
+        {
+            // Already have an instance of the cancellation token source?
+            // This means the button has already been pressed!
+
+            cancellationTokenSource.Cancel();
+            cancellationTokenSource = null;
+
+            Search.Content = "Search";
+            AfterLoadingStockData();
+            return;
+        }
+
+        private void filterDataFail(Task<List<StockPrice>> faultedTask)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                AfterLoadingStockData();
+                Notes.Text = faultedTask.Exception.InnerException.Message;
+            });
+        }
+
+        private void loadLineFailed(Task<List<string>> faultedTask)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                AfterLoadingStockData();
+                Notes.Text = faultedTask.Exception.InnerException.Message;
+            });
+        }
+
+        private List<StockPrice> ProcessStocks(Task<List<string>> completedTask)
+        {
+            var data = new List<StockPrice>();
+
+            var lines = completedTask.Result;
+
+            foreach (var line in lines.Skip(1))
+            {
+                var price = StockPrice.FromCSV(line);
+
+                data.Add(price);
+            }
+
+            return data;
+        }
+
+        private List<StockPrice> FilterStocks(Task<List<StockPrice>> completedTask)
+        {
+            var selectionText = Dispatcher.Invoke(() => { return StockIdentifier.Text; });
+
+            var data = completedTask.Result;
+
+            var dataFilteredReadable = data.Where(sp => sp.Identifier == selectionText).ToList();
+
+            if (!dataFilteredReadable.Any())
+            {
+                throw new Exception($"Could not find any stocks.");
+            }
+
+            return data;
+        }
+
+        private void UpdateStocks(Task<List<StockPrice>> completedTask)
+        {
+            var data = completedTask.Result;
+
+            Dispatcher.Invoke(() =>
+            {
+                Stocks.ItemsSource = data.Where(sp => sp.Identifier == StockIdentifier.Text);
+            });
+        }
+
+        private static Task<List<string>> SearchForStocks(CancellationToken cancellationToken)
+        {
+            var resultTask = Task.Run(async () =>
+            {
+                using (var stream = new StreamReader(File.OpenRead("StockPrices_Small.csv")))
+                {
+                    var lines = new List<string>();
+
+                    string line;
+                    while ((line = await stream.ReadLineAsync()) != null)
+                    {
+                        if(cancellationToken.IsCancellationRequested)
+                        {
+                            break;
+                        }
+                        lines.Add(line);
+                    }
+
+                    return lines;
+                }
+            }, cancellationToken);
+
+            return resultTask;
         }
 
         private async Task GetStocks()
