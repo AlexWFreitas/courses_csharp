@@ -39,30 +39,32 @@ namespace StockAnalyzer.Windows
             try
             {
                 // Instantiates a CancellationTokenSource object ( Means that the search is running )
-                cancellationTokenSource = new CancellationTokenSource(); 
+                cancellationTokenSource = new CancellationTokenSource();
+                CancellationToken token = cancellationTokenSource.Token;
 
                 Search.Content = "Cancel"; // Button text
+                Stocks.ItemsSource = null; // Clears the table content
 
                 // Displays the loading bar and starts stop watch
                 BeforeLoadingStockData();
 
                 // Load Lines Task
-                Task<List<string>> loadLinesTask = SearchForStocks(cancellationTokenSource.Token);
+                Task<List<string>> loadLinesTask = SearchForStocks(token);
 
                 // Load Lines - Continuations
-                var processStocksTask = loadLinesTask.ContinueWith( t => ProcessStocks(t), TaskContinuationOptions.OnlyOnRanToCompletion);
+                var processStocksTask = loadLinesTask.ContinueWith( t => ProcessStocks(t), token, TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Current);
                 loadLinesTask.ContinueWith( t => LoadLineFail(t), TaskContinuationOptions.OnlyOnFaulted);
 
                 // Process Stocks Continuations
-                var filterStocksTask = processStocksTask.ContinueWith( t => FilterStocks(t), TaskContinuationOptions.OnlyOnRanToCompletion);
+                var filterStocksTask = processStocksTask.ContinueWith( t => FilterStocks(t), token, TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Current);
 
                 // Filter Stocks Continuations
-                var updateStocksTask = filterStocksTask.ContinueWith(t => UpdateStocks(t), TaskContinuationOptions.OnlyOnRanToCompletion);
+                var updateStocksTask = filterStocksTask.ContinueWith(t => UpdateStocks(t), token, TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Current);
                 filterStocksTask.ContinueWith( t => FilterDataFail(t), TaskContinuationOptions.OnlyOnFaulted);
 
                 // Update Stocks Continuations
                 // Removes loading animation, restores search button text, assigns null to cancellationTokenSource
-                updateStocksTask.ContinueWith( _ => AfterTaskCleanUp(), TaskContinuationOptions.OnlyOnRanToCompletion);
+                updateStocksTask.ContinueWith( _ => AfterTaskCleanUp(), token, TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Current);
             }
             catch (Exception ex)
             {
@@ -103,6 +105,7 @@ namespace StockAnalyzer.Windows
             {
                 AfterLoadingStockData();
                 Notes.Text = faultedTask.Exception.InnerException.Message;
+                Search.Content = "Search";
             });
         }
         private List<StockPrice> FilterStocks(Task<List<StockPrice>> completedTask)
@@ -127,6 +130,7 @@ namespace StockAnalyzer.Windows
             {
                 AfterLoadingStockData();
                 Notes.Text = faultedTask.Exception.InnerException.Message;
+                Search.Content = "Search";
             });
         }
 
@@ -146,7 +150,7 @@ namespace StockAnalyzer.Windows
             return data;
         }
 
-        private static Task<List<string>> SearchForStocks(CancellationToken cancellationToken)
+        private static Task<List<string>> SearchForStocks(CancellationToken token)
         {
             var resultTask = Task.Run(async () =>
             {
@@ -157,7 +161,7 @@ namespace StockAnalyzer.Windows
                     string line;
                     while ((line = await stream.ReadLineAsync()) != null)
                     {
-                        if (cancellationToken.IsCancellationRequested)
+                        if (token.IsCancellationRequested)
                         {
                             break;
                         }
@@ -166,7 +170,7 @@ namespace StockAnalyzer.Windows
 
                     return lines;
                 }
-            }, cancellationToken);
+            }, token);
 
             return resultTask;
         }
