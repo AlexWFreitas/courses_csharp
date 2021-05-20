@@ -50,7 +50,6 @@ namespace StockAnalyzer.Windows
 
                 // Load Lines Task
                 Task<List<string>> loadLinesTask = SearchForStocks(token);
-                cancellationTokenSource.Cancel();
 
                 // Load Lines - Continuations
                 var processStocksTask = loadLinesTask.ContinueWith( t => ProcessStocks(t), TaskContinuationOptions.OnlyOnRanToCompletion);
@@ -166,7 +165,6 @@ namespace StockAnalyzer.Windows
                     {
                         if (token.IsCancellationRequested)
                         {
-                            token.ThrowIfCancellationRequested();
                             break;
                         }
                         lines.Add(line);
