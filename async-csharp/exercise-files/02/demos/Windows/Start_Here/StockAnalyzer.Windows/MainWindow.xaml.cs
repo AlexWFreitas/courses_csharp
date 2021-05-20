@@ -53,16 +53,38 @@ namespace StockAnalyzer.Windows
                 // Displays the loading bar and starts stop watch
                 BeforeLoadingStockData();
 
+
+                // Public API Method
+
+                var identifiers = StockIdentifier.Text
+                                                 .Split(',', ' ');
+
                 var service = new StockService();
 
-                var data = await service.GetStockPricesFor(StockIdentifier.Text, token);
+                var loadingTasks = new List<Task<IEnumerable<StockPrice>>>();
+                foreach (var identifier in identifiers)
+                {
+                    var loadTask = service.GetStockPricesFor(identifier, 
+                        cancellationTokenSource.Token);
 
-                Stocks.ItemsSource = data;
-                
+                    loadingTasks.Add(loadTask);
+                }
 
-                // Data Store Method
-                // LoadStocksFromDataStore(token);
+                var timeoutTask = Task.Delay(2000);
+                var allStocksLoadingTask = Task.WhenAll(loadingTasks);
 
+                var completedTask = await Task.WhenAny(allStocksLoadingTask, timeoutTask);
+
+                if (completedTask == timeoutTask)
+                {
+                    if (cancellationTokenSource != null)
+                        cancellationTokenSource.Cancel();
+                    throw new OperationCanceledException("Timeout!");
+                }
+
+                Stocks.ItemsSource = allStocksLoadingTask
+                    .Result
+                    .SelectMany(x => x);
             }
             catch (Exception ex)
             {

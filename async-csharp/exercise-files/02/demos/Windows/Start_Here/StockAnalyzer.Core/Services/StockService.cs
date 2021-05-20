@@ -16,7 +16,7 @@ namespace StockAnalyzer.Core.Services
 
     public class StockService : IStockService
     {
-        private static string API_URL = "https://ps-async.fekberg.com/api/stocks";
+        private static string API_URL = "https://60a68095b970910017eb1ce1.mockapi.io/api/stocks/";
         private int i = 0;
 
         public async Task<IEnumerable<StockPrice>>
