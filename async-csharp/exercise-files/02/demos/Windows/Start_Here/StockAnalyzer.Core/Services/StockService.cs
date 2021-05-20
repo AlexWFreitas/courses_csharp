@@ -27,7 +27,7 @@ namespace StockAnalyzer.Core.Services
             // it takes a little bit longer.
             //
             // DO NOT DO THIS IN PRODUCTION...
-            await Task.Delay((i++) * 1000);
+            // await Task.Delay((i++) * 1000);
 
             using (var client = new HttpClient())
             {

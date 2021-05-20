@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using StockAnalyzer.Core;
 using StockAnalyzer.Core.Domain;
+using StockAnalyzer.Core.Services;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -27,7 +28,7 @@ namespace StockAnalyzer.Windows
             InitializeComponent();
         }
 
-        private void Search_Click(object sender, RoutedEventArgs e)
+        private async void Search_Click(object sender, RoutedEventArgs e)
         {
             // Cancels the current Search if already searching
             if(cancellationTokenSource != null)
@@ -52,30 +53,48 @@ namespace StockAnalyzer.Windows
                 // Displays the loading bar and starts stop watch
                 BeforeLoadingStockData();
 
-                // Load Lines Task
-                Task<List<string>> loadLinesTask = SearchForStocks(token);
+                var service = new StockService();
 
-                // Load Lines - Continuations
-                var processStocksTask = loadLinesTask.ContinueWith( t => ProcessStocks(t), TaskContinuationOptions.OnlyOnRanToCompletion);
-                loadLinesTask.ContinueWith( t => LoadLineFail(t), TaskContinuationOptions.OnlyOnFaulted);
+                var data = await service.GetStockPricesFor(StockIdentifier.Text, token);
 
-                // Process Stocks - Continuations
-                var filterStocksTask = processStocksTask.ContinueWith( t => FilterStocks(t), token, TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Current);
+                Stocks.ItemsSource = data;
+                
 
-                // Filter Stocks - Continuations
-                var updateStocksTask = filterStocksTask.ContinueWith(t => UpdateStocks(t), token, TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Current);
-                filterStocksTask.ContinueWith( t => FilterDataFail(t), TaskContinuationOptions.OnlyOnFaulted);
-
-                // Update Stocks - Continuations
-                // Removes loading animation, restores search button text, assigns null to cancellationTokenSource
-                updateStocksTask.ContinueWith( _ => AfterTaskCleanUp(), token, TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Current);
-
+                // Data Store Method
+                // LoadStocksFromDataStore(token);
 
             }
             catch (Exception ex)
             {
                 Notes.Text = ex.Message;
             }
+            finally
+            {
+                AfterLoadingStockData();
+                cancellationTokenSource = null;
+                Search.Content = "Search";
+            }
+        }
+
+        private void LoadStocksFromDataStore(CancellationToken token)
+        {
+            // Load Lines Task
+            Task<List<string>> loadLinesTask = SearchForStocks(token);
+
+            // Load Lines - Continuations
+            var processStocksTask = loadLinesTask.ContinueWith(t => ProcessStocks(t), TaskContinuationOptions.OnlyOnRanToCompletion);
+            loadLinesTask.ContinueWith(t => LoadLineFail(t), TaskContinuationOptions.OnlyOnFaulted);
+
+            // Process Stocks - Continuations
+            var filterStocksTask = processStocksTask.ContinueWith(t => FilterStocks(t), token, TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Current);
+
+            // Filter Stocks - Continuations
+            var updateStocksTask = filterStocksTask.ContinueWith(t => UpdateStocks(t), token, TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Current);
+            filterStocksTask.ContinueWith(t => FilterDataFail(t), TaskContinuationOptions.OnlyOnFaulted);
+
+            // Update Stocks - Continuations
+            // Removes loading animation, restores search button text, assigns null to cancellationTokenSource
+            updateStocksTask.ContinueWith(_ => AfterTaskCleanUp(), token, TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Current);
         }
 
         // Continuation Methods
