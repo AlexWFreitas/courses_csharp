@@ -48,6 +48,7 @@ namespace StockAnalyzer.Windows
 
                 // Set UI Elements to the proper setting at this point in time
                 Search.Content = "Cancel"; // Button text
+                Notes.Text = null;
                 Stocks.ItemsSource = null; // Clears the table content
 
                 // Displays the loading bar and starts stop watch
@@ -70,16 +71,19 @@ namespace StockAnalyzer.Windows
                     loadingTasks.Add(loadTask);
                 }
 
-                var timeoutTask = Task.Delay(2000);
+                var timeoutTask = Task.Delay(200000);
                 var allStocksLoadingTask = Task.WhenAll(loadingTasks);
 
                 var completedTask = await Task.WhenAny(allStocksLoadingTask, timeoutTask);
 
                 if (completedTask == timeoutTask)
                 {
-                    if (cancellationTokenSource != null)
+                    if (cancellationTokenSource != null && !token.IsCancellationRequested)
+                    {
                         cancellationTokenSource.Cancel();
-                    throw new OperationCanceledException("Timeout!");
+                        throw new OperationCanceledException("Timeout!");
+                    }
+
                 }
 
                 Stocks.ItemsSource = allStocksLoadingTask

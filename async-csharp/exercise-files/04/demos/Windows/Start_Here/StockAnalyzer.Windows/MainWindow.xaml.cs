@@ -47,16 +47,37 @@ namespace StockAnalyzer.Windows
             try
             {
                 cancellationTokenSource = new CancellationTokenSource();
-                cancellationTokenSource.Token.Register(() => {
-                    Notes.Text = "Cancellation requested";
-                });
+                var token = cancellationTokenSource.Token;
                 Search.Content = "Cancel"; // Button text
 
                 BeforeLoadingStockData();
 
                 var service = new StockService();
 
-                var data = await service.GetStockPricesFor(StockIdentifier.Text, cancellationTokenSource.Token);
+                var identifiers = StockIdentifier.Text
+                                                 .Split(',', ' ');
+
+                var loadingTasks = new List<Task<IEnumerable<StockPrice>>>();
+
+                foreach (var identifier in identifiers)
+                {
+                    var loadTask = service.GetStockPricesFor(identifier, token);
+                    loadingTasks.Add(loadTask);
+                }
+
+                var timeoutTask = Task.Delay(2000);
+                var allStocksLoadingTask = Task.WhenAll(loadingTasks);
+
+                var completedTask = await Task.WhenAny(timeoutTask, allStocksLoadingTask);
+
+                if (completedTask == timeoutTask && cancellationTokenSource != null)
+                {
+                    cancellationTokenSource.Cancel();
+                    throw new OperationCanceledException("Timeout!");
+                }
+
+                var data = allStocksLoadingTask.Result.SelectMany(x => x);
+
                 Stocks.ItemsSource = data;
             }
             catch (Exception ex)

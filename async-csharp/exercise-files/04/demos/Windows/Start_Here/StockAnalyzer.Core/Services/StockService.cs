@@ -17,6 +17,7 @@ namespace StockAnalyzer.Core.Services
     public class StockService : IStockService
     {
         private static string API_URL = "https://ps-async.fekberg.com/api/stocks";
+        private static string API2_URL = "https://60a68095b970910017eb1ce1.mockapi.io/api/stocks/";
         private int i = 0;
 
         public async Task<IEnumerable<StockPrice>>
@@ -31,7 +32,7 @@ namespace StockAnalyzer.Core.Services
 
             using (var client = new HttpClient())
             {
-                var result = await client.GetAsync($"{API_URL}/{stockIdentifier}",
+                var result = await client.GetAsync($"{API2_URL}/{stockIdentifier}",
                     cancellationToken);
 
                 result.EnsureSuccessStatusCode();
