@@ -42,6 +42,10 @@ namespace StockAnalyzer.Windows
                 cancellationTokenSource = new CancellationTokenSource();
                 CancellationToken token = cancellationTokenSource.Token;
 
+                // Register Callback - Register a delegate to call when a cancellation request is made.
+                token.Register(() => Notes.Text = "Cancellation requested.");
+
+                // Set UI Elements to the proper setting at this point in time
                 Search.Content = "Cancel"; // Button text
                 Stocks.ItemsSource = null; // Clears the table content
 
