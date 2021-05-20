@@ -55,7 +55,7 @@ namespace StockAnalyzer.Windows
                 BeforeLoadingStockData();
 
 
-                // Public API Method
+                // StockService Method
 
                 var identifiers = StockIdentifier.Text
                                                  .Split(',', ' ');
@@ -71,7 +71,7 @@ namespace StockAnalyzer.Windows
                     loadingTasks.Add(loadTask);
                 }
 
-                var timeoutTask = Task.Delay(200000);
+                var timeoutTask = Task.Delay(4000);
                 var allStocksLoadingTask = Task.WhenAll(loadingTasks);
 
                 var completedTask = await Task.WhenAny(allStocksLoadingTask, timeoutTask);

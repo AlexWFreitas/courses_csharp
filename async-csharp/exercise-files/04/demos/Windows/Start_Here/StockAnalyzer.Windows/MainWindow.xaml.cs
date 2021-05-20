@@ -68,7 +68,7 @@ namespace StockAnalyzer.Windows
                     loadingTasks.Add(loadTask);
                 }
 
-                var timeoutTask = Task.Delay(4000);
+                var timeoutTask = Task.Delay(2000);
                 var allStocksLoadingTask = Task.WhenAll(loadingTasks);
 
                 var completedTask = await Task.WhenAny(timeoutTask, allStocksLoadingTask);
