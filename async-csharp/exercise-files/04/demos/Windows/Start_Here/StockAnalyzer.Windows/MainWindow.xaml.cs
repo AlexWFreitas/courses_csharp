@@ -41,6 +41,7 @@ namespace StockAnalyzer.Windows
                 cancellationTokenSource = null;
 
                 Search.Content = "Search";
+                AfterLoadingStockData();
                 return;
             }
 
@@ -49,6 +50,8 @@ namespace StockAnalyzer.Windows
                 cancellationTokenSource = new CancellationTokenSource();
                 var token = cancellationTokenSource.Token;
                 Search.Content = "Cancel"; // Button text
+                Stocks.ItemsSource = null;
+                Notes.Text = null;
 
                 BeforeLoadingStockData();
 
@@ -65,7 +68,7 @@ namespace StockAnalyzer.Windows
                     loadingTasks.Add(loadTask);
                 }
 
-                var timeoutTask = Task.Delay(2000);
+                var timeoutTask = Task.Delay(4000);
                 var allStocksLoadingTask = Task.WhenAll(loadingTasks);
 
                 var completedTask = await Task.WhenAny(timeoutTask, allStocksLoadingTask);
@@ -76,9 +79,28 @@ namespace StockAnalyzer.Windows
                     throw new OperationCanceledException("Timeout!");
                 }
 
-                var data = allStocksLoadingTask.Result.SelectMany(x => x);
+                if (allStocksLoadingTask.IsCompleted)
+                {
+                    var data = allStocksLoadingTask.Result;
 
-                Stocks.ItemsSource = data;
+                    var flattenedData = data.SelectMany(x => x);
+
+                    Stocks.ItemsSource = flattenedData;
+                }
+            }
+            catch (AggregateException ex)
+            {
+                var comboString = ex.Message;
+
+                if (ex.InnerExceptions != null)
+                {
+                    foreach (var exception in ex.InnerExceptions)
+                    {
+                        comboString += $"\n{exception.Message}";
+                    }
+                }
+
+                Notes.Text = comboString;
             }
             catch (Exception ex)
             {
