@@ -3,6 +3,7 @@ using StockAnalyzer.Core;
 using StockAnalyzer.Core.Domain;
 using StockAnalyzer.Core.Services;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -58,16 +59,25 @@ namespace StockAnalyzer.Windows
 
                 BeforeLoadingStockData();
 
-                var service = new MockStockService();
+                var service = new StockService();
 
                 var identifiers = StockIdentifier.Text
                                                  .Split(',', ' ');
 
                 var loadingTasks = new List<Task<IEnumerable<StockPrice>>>();
+                var stocks = new ConcurrentBag<StockPrice>();
 
                 foreach (var identifier in identifiers)
                 {
                     var loadTask = service.GetStockPricesFor(identifier, token);
+                    loadTask = loadTask.ContinueWith(t =>
+                      {
+                          foreach (var element in t.Result)
+                          {
+                              stocks.Add(element);
+                          }
+                          return t.Result;
+                      }, token, TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Current);
                     loadingTasks.Add(loadTask);
                 }
 
