@@ -45,6 +45,9 @@ namespace StockAnalyzer.Windows
                 return;
             }
 
+            // Waypoint to AggregateException from an awaited Task.
+            Task aggregateExceptionTask = null;
+
             try
             {
                 cancellationTokenSource = new CancellationTokenSource();
@@ -68,7 +71,7 @@ namespace StockAnalyzer.Windows
                     loadingTasks.Add(loadTask);
                 }
 
-                var timeoutTask = Task.Delay(2000);
+                var timeoutTask = Task.Delay(3000);
                 var allStocksLoadingTask = Task.WhenAll(loadingTasks);
 
                 var completedTask = await Task.WhenAny(timeoutTask, allStocksLoadingTask);
@@ -79,14 +82,15 @@ namespace StockAnalyzer.Windows
                     throw new OperationCanceledException("Timeout!");
                 }
 
-                if (allStocksLoadingTask.IsCompleted)
-                {
-                    var data = allStocksLoadingTask.Result;
+                aggregateExceptionTask = allStocksLoadingTask;
 
-                    var flattenedData = data.SelectMany(x => x);
+                await aggregateExceptionTask;
 
-                    Stocks.ItemsSource = flattenedData;
-                }
+                var data = allStocksLoadingTask.Result;
+
+                var flattenedData = data.SelectMany(x => x);
+
+                Stocks.ItemsSource = flattenedData;
             }
             catch (AggregateException ex)
             {
@@ -105,6 +109,14 @@ namespace StockAnalyzer.Windows
             catch (Exception ex)
             {
                 Notes.Text = ex.Message;
+
+                if (aggregateExceptionTask?.Exception?.InnerExceptions != null && 
+                    aggregateExceptionTask.Exception.InnerExceptions.Any())
+                    Notes.Text = aggregateExceptionTask.Exception.Message;
+                    foreach (var innerEx in aggregateExceptionTask.Exception.InnerExceptions)
+                    {
+                        Notes.Text += $"\n{innerEx.Message}";
+                    }
             }
             finally
             {
