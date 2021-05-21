@@ -112,11 +112,13 @@ namespace StockAnalyzer.Windows
 
                 if (aggregateExceptionTask?.Exception?.InnerExceptions != null && 
                     aggregateExceptionTask.Exception.InnerExceptions.Any())
+                { 
                     Notes.Text = aggregateExceptionTask.Exception.Message;
                     foreach (var innerEx in aggregateExceptionTask.Exception.InnerExceptions)
                     {
-                        Notes.Text += $"\n{innerEx.Message}";
+                        Notes.Text += $"\n{innerEx.Message}"; 
                     }
+                }
             }
             finally
             {
