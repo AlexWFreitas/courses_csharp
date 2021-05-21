@@ -42,4 +42,56 @@ namespace StockAnalyzer.Core.Services
             }
         }
     }
+
+    public class MockStockService : IStockService
+    {
+        private int i = 0;
+        public async Task<IEnumerable<StockPrice>> GetStockPricesFor(string stockIdentifier, CancellationToken cancellationToken)
+        {
+
+            await Task.Delay((i++) * 2000);
+
+            var stocks = new List<StockPrice>
+            {
+                new StockPrice
+                {
+                    Identifier = "MSFT",
+                    Change = 0.5m,
+                    ChangePercent = 0.75m
+                },
+                new StockPrice
+                {
+                    Identifier = "GOOGL",
+                    Change = 0.4m,
+                    ChangePercent = 0.75m
+                },
+                new StockPrice
+                {
+                    Identifier = "AAPL",
+                    Change = 0.3m,
+                    ChangePercent = 0.75m
+                },
+                new StockPrice
+                {
+                    Identifier = "CAT",
+                    Change = 0.2m,
+                    ChangePercent = 0.75m
+                }
+            };
+
+            var task = Task.FromResult(stocks.Where(stock => stock.Identifier == stockIdentifier));
+
+            if (cancellationToken.IsCancellationRequested)
+            {
+                throw new System.Exception("Search was canceled.");
+            }
+
+            if (!task.Result.Any())
+            {
+                throw new System.Exception("Search has returned no results.");
+            }
+
+            return task.Result;
+        }
+    }
 }

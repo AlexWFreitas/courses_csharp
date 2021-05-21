@@ -58,7 +58,7 @@ namespace StockAnalyzer.Windows
 
                 BeforeLoadingStockData();
 
-                var service = new StockService();
+                var service = new MockStockService();
 
                 var identifiers = StockIdentifier.Text
                                                  .Split(',', ' ');
