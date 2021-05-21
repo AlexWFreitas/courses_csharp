@@ -71,26 +71,27 @@ namespace StockAnalyzer.Windows
                     loadingTasks.Add(loadTask);
                 }
 
-                var timeoutTask = Task.Delay(3000);
+                var timeoutTask = Task.Delay(10000);
                 var allStocksLoadingTask = Task.WhenAll(loadingTasks);
 
                 var completedTask = await Task.WhenAny(timeoutTask, allStocksLoadingTask);
 
-                if (completedTask == timeoutTask && cancellationTokenSource != null)
+                if (completedTask == timeoutTask)
                 {
-                    cancellationTokenSource.Cancel();
+                    if (cancellationTokenSource != null)
+                    { 
+                        cancellationTokenSource.Cancel();
+                    }
                     throw new OperationCanceledException("Timeout!");
                 }
 
                 aggregateExceptionTask = allStocksLoadingTask;
 
-                await aggregateExceptionTask;
+                var allStocksLoadingTaskResults = await allStocksLoadingTask;
 
-                var data = allStocksLoadingTask.Result;
+                var flattenedResults = allStocksLoadingTaskResults.SelectMany(x => x);
 
-                var flattenedData = data.SelectMany(x => x);
-
-                Stocks.ItemsSource = flattenedData;
+                Stocks.ItemsSource = flattenedResults;
             }
             catch (AggregateException ex)
             {
