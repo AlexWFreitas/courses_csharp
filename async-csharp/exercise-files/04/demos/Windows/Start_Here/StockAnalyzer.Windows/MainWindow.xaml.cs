@@ -70,18 +70,29 @@ namespace StockAnalyzer.Windows
                 foreach (var identifier in identifiers)
                 {
                     var loadTask = service.GetStockPricesFor(identifier, token);
+
                     loadTask = loadTask.ContinueWith(t =>
                       {
-                          foreach (var element in t.Result)
+                          var aFewStocks = t.Result.Take(5);
+
+                          foreach (var element in aFewStocks)
                           {
                               stocks.Add(element);
                           }
-                          return t.Result;
+
+                          Dispatcher.Invoke(() =>
+                          {
+                              Stocks.ItemsSource = stocks.ToArray();
+                          });
+
+                          return aFewStocks;
+
                       }, token, TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Current);
+
                     loadingTasks.Add(loadTask);
                 }
 
-                var timeoutTask = Task.Delay(10000);
+                var timeoutTask = Task.Delay(12000);
                 var allStocksLoadingTask = Task.WhenAll(loadingTasks);
 
                 var completedTask = await Task.WhenAny(timeoutTask, allStocksLoadingTask);
@@ -97,25 +108,7 @@ namespace StockAnalyzer.Windows
 
                 aggregateExceptionTask = allStocksLoadingTask;
 
-                var allStocksLoadingTaskResults = await allStocksLoadingTask;
-
-                var flattenedResults = allStocksLoadingTaskResults.SelectMany(x => x);
-
-                Stocks.ItemsSource = flattenedResults;
-            }
-            catch (AggregateException ex)
-            {
-                var comboString = ex.Message;
-
-                if (ex.InnerExceptions != null)
-                {
-                    foreach (var exception in ex.InnerExceptions)
-                    {
-                        comboString += $"\n{exception.Message}";
-                    }
-                }
-
-                Notes.Text = comboString;
+                await allStocksLoadingTask;
             }
             catch (Exception ex)
             {
