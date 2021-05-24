@@ -110,6 +110,20 @@ namespace StockAnalyzer.Windows
 
                 await allStocksLoadingTask;
             }
+            catch (AggregateException ex)
+            {
+                var comboString = ex.Message;
+
+                if (ex.InnerExceptions != null)
+                {
+                    foreach (var exception in ex.InnerExceptions)
+                    {
+                        comboString += $"\n{exception.Message}";
+                    }
+                }
+
+                Notes.Text = comboString;
+            }
             catch (Exception ex)
             {
                 Notes.Text = ex.Message;
