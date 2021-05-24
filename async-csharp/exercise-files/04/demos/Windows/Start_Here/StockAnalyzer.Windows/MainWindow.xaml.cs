@@ -155,7 +155,6 @@ namespace StockAnalyzer.Windows
 
 
 
-
         private static Task<List<string>> 
             SearchForStocks(CancellationToken cancellationToken)
         {
