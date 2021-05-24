@@ -71,7 +71,7 @@ namespace StockAnalyzer.Windows
                 {
                     var loadTask = service.GetStockPricesFor(identifier, token);
 
-                    loadTask = loadTask.ContinueWith(t =>
+                    var loadTaskContinuation = loadTask.ContinueWith(t =>
                       {
                           var aFewStocks = t.Result.Take(5);
 
@@ -89,6 +89,7 @@ namespace StockAnalyzer.Windows
 
                       }, token, TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Current);
 
+                    loadingTasks.Add(loadTaskContinuation);
                     loadingTasks.Add(loadTask);
                 }
 
