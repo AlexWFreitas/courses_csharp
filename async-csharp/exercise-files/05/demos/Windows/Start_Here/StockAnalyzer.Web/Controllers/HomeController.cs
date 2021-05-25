@@ -37,7 +37,7 @@ namespace StockAnalyzer.Web.Controllers
 
             var data = await GetStocks();
 
-            return Json(data);
+            return Json(data, JsonRequestBehavior.AllowGet);
         }
 
         public async Task<IEnumerable<StockPrice>> GetStocks()
@@ -45,10 +45,10 @@ namespace StockAnalyzer.Web.Controllers
             var service = new StockService();
 
             var task = service.GetStockPricesFor("MSFT", CancellationToken.None);
-            
+
             var data = await task.ConfigureAwait(false);
 
-            var context = System.Web.HttpContext.Current;
+            var context = HttpContext.ApplicationInstance.Context;
 
             return data;
         }
