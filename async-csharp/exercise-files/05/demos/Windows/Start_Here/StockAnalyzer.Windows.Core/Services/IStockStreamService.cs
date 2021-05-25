@@ -7,7 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using StockAnalyzer.Core.Domain;
 
-namespace StockAnalyzer.Windows.Services
+namespace StockAnalyzer.Windows.Core.Services
 {
     public interface IStockStreamService
     {
