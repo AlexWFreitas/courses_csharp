@@ -33,122 +33,30 @@ namespace StockAnalyzer.Windows
 
         private async void Search_Click(object sender, RoutedEventArgs e)
         {
-            if(cancellationTokenSource != null)
-            {
-                // Already have an instance of the cancellation token source?
-                // This means the button has already been pressed!
-
-                cancellationTokenSource.Cancel();
-                cancellationTokenSource = null;
-
-                Search.Content = "Search";
-                AfterLoadingStockData();
-                return;
-            }
-
-            // Waypoint to AggregateException from an awaited Task.
-            Task aggregateExceptionTask = null;
-
             try
             {
-                cancellationTokenSource = new CancellationTokenSource();
-                var token = cancellationTokenSource.Token;
-                Search.Content = "Cancel"; // Button text
-                Stocks.ItemsSource = null;
-                Notes.Text = null;
+                var data = await GetStocksFor(StockIdentifier.Text);
 
-                BeforeLoadingStockData();
+                Notes.Text = "Stocks loaded!";
 
-                var service = new StockService();
-
-                var identifiers = StockIdentifier.Text
-                                                 .Split(',', ' ');
-
-                var loadingTasks = new List<Task<IEnumerable<StockPrice>>>();
-                var stocks = new ConcurrentBag<StockPrice>();
-
-                foreach (var identifier in identifiers)
-                {
-                    var loadTask = service.GetStockPricesFor(identifier, token);
-
-                    var loadTaskContinuation = loadTask.ContinueWith(t =>
-                      {
-                          var aFewStocks = t.Result.Take(5);
-
-                          foreach (var element in aFewStocks)
-                          {
-                              stocks.Add(element);
-                          }
-
-                          Dispatcher.Invoke(() =>
-                          {
-                              Stocks.ItemsSource = stocks.ToArray();
-                          });
-
-                          return aFewStocks;
-
-                      }, token, TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Current);
-
-                    loadingTasks.Add(loadTaskContinuation);
-                    loadingTasks.Add(loadTask);
-                }
-
-                var timeoutTask = Task.Delay(12000);
-                var allStocksLoadingTask = Task.WhenAll(loadingTasks);
-
-                var completedTask = await Task.WhenAny(timeoutTask, allStocksLoadingTask);
-
-                if (completedTask == timeoutTask)
-                {
-                    if (cancellationTokenSource != null)
-                    { 
-                        cancellationTokenSource.Cancel();
-                    }
-                    throw new OperationCanceledException("Timeout!");
-                }
-
-                aggregateExceptionTask = allStocksLoadingTask;
-
-                await allStocksLoadingTask;
-            }
-            catch (AggregateException ex)
-            {
-                var comboString = ex.Message;
-
-                if (ex.InnerExceptions != null)
-                {
-                    foreach (var exception in ex.InnerExceptions)
-                    {
-                        comboString += $"\n{exception.Message}";
-                    }
-                }
-
-                Notes.Text = comboString;
+                Stocks.ItemsSource = data;
             }
             catch (Exception ex)
             {
                 Notes.Text = ex.Message;
-
-                if (aggregateExceptionTask?.Exception?.InnerExceptions != null && 
-                    aggregateExceptionTask.Exception.InnerExceptions.Any())
-                { 
-                    Notes.Text = aggregateExceptionTask.Exception.Message;
-                    foreach (var innerEx in aggregateExceptionTask.Exception.InnerExceptions)
-                    {
-                        Notes.Text += $"\n{innerEx.Message}"; 
-                    }
-                }
-            }
-            finally
-            {
-                AfterLoadingStockData();
-
-                cancellationTokenSource = null;
-                Search.Content = "Search";
             }
         }
 
+        private async Task<IEnumerable<StockPrice>>
+            GetStocksFor(string identifier)
+        {
+            var service = new StockService();
+            var data = await service.GetStockPricesFor(identifier, CancellationToken.None).ConfigureAwait(false);
 
+
+            return data.Take(5);
+        }
+                
 
 
 
