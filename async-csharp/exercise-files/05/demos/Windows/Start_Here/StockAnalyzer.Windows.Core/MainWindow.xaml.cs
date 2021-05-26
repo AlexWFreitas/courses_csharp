@@ -33,18 +33,9 @@ namespace StockAnalyzer.Windows
 
         CancellationTokenSource cancellationTokenSource;
 
-        private void Search_Click(object sender, RoutedEventArgs e)
+        private async void Search_Click(object sender, RoutedEventArgs e)
         {
-            try
-            {
-                Task.Run(SearchForStocks);
-            }
-            catch (Exception ex)
-            {
-                Notes.Text = ex.Message;
-            }
-
-            // await SearchStocksStreamFromDisk();
+            await SearchStocksStreamFromDisk();
         }
 
 
