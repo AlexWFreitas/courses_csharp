@@ -56,7 +56,7 @@ namespace StockAnalyzer.Windows
                 var data = new ObservableCollection<StockPrice>();
                 Stocks.ItemsSource = data;
 
-                var service = new MockStockStreamService();
+                var service = new StockDiskStreamService();
 
                 var enumerator = service.GetAllStockPrices();
 

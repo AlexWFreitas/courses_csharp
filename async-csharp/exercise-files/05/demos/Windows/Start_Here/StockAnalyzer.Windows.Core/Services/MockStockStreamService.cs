@@ -9,7 +9,7 @@ using StockAnalyzer.Core.Domain;
 
 namespace StockAnalyzer.Windows.Core.Services
 {
-    class MockStockStreamService : IStockStreamService
+    public class MockStockStreamService : IStockStreamService
     {
         public async IAsyncEnumerable<StockPrice>
             GetAllStockPrices([EnumeratorCancellation]CancellationToken cancellationToken = default)
