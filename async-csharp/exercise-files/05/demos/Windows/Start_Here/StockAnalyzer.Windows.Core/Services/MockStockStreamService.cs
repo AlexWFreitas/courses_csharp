@@ -11,7 +11,7 @@ namespace StockAnalyzer.Windows.Core.Services
 {
     class MockStockStreamService : IStockStreamService
     {
-        public async IAsyncEnumerable<StockPrice> 
+        public async IAsyncEnumerable<StockPrice>
             GetAllStockPrices([EnumeratorCancellation]CancellationToken cancellationToken = default)
         {
             await Task.Delay(500, cancellationToken);
@@ -33,7 +33,6 @@ namespace StockAnalyzer.Windows.Core.Services
             await Task.Delay(500, cancellationToken);
 
             yield return new StockPrice { Identifier = "CAT", Change = 0.6m };
-
         }
     }
 }

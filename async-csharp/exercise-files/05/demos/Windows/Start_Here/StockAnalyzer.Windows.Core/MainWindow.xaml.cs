@@ -35,9 +35,21 @@ namespace StockAnalyzer.Windows
 
         private async void Search_Click(object sender, RoutedEventArgs e)
         {
+            if (cancellationTokenSource != null)
+            {
+                cancellationTokenSource.Cancel();
+                return;
+            }
+
             try
             {
                 BeforeLoadingStockData();
+
+                // Resets UI Elements and creates a new instance of CancellationTokenSource
+                cancellationTokenSource = new CancellationTokenSource();
+                var token = cancellationTokenSource.Token;
+                Search.Content = "Cancel";
+                Notes.Text = "";
 
                 var identifiers = StockIdentifier.Text.Split(' ', ',');
 
@@ -48,7 +60,7 @@ namespace StockAnalyzer.Windows
 
                 var enumerator = service.GetAllStockPrices();
 
-                await foreach(var price in enumerator.WithCancellation(CancellationToken.None))
+                await foreach(var price in enumerator.WithCancellation(token))
                 {
                     if (identifiers.Contains(price.Identifier))
                     { 
@@ -62,6 +74,8 @@ namespace StockAnalyzer.Windows
             }
             finally
             {
+                Search.Content = "Search";
+                cancellationTokenSource = null;
                 AfterLoadingStockData();
             }
         }
