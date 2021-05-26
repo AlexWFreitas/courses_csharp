@@ -33,7 +33,39 @@ namespace StockAnalyzer.Windows
 
         CancellationTokenSource cancellationTokenSource;
 
-        private async void Search_Click(object sender, RoutedEventArgs e)
+        private void Search_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                Task.Run(SearchForStocks);
+            }
+            catch (Exception ex)
+            {
+                Notes.Text = ex.Message;
+            }
+
+            // await SearchStocksStreamFromDisk();
+        }
+
+
+        private async Task SearchForStocks()
+        {
+            var service = new StockService();
+            var loadingTasks = new List<Task<IEnumerable<StockPrice>>>();
+
+            foreach (var identifier in StockIdentifier.Text.Split(' '))
+            {
+                var loadTask = service.GetStockPricesFor(identifier, CancellationToken.None);
+                loadingTasks.Add(loadTask);
+            }
+
+            var data = await Task.WhenAll(loadingTasks);
+
+            Stocks.ItemsSource = data.SelectMany(stock => stock);
+        }
+
+
+        private async Task SearchStocksStreamFromDisk()
         {
             if (cancellationTokenSource != null)
             {
@@ -53,6 +85,7 @@ namespace StockAnalyzer.Windows
 
                 var identifiers = StockIdentifier.Text.Split(' ', ',');
 
+                // Dynamic data that updates the UI as soon as it is updated.
                 var data = new ObservableCollection<StockPrice>();
                 Stocks.ItemsSource = data;
 
@@ -60,15 +93,15 @@ namespace StockAnalyzer.Windows
 
                 var enumerator = service.GetAllStockPrices();
 
-                await foreach(var price in enumerator.WithCancellation(token))
+                await foreach (var price in enumerator.WithCancellation(token))
                 {
                     if (identifiers.Contains(price.Identifier))
-                    { 
+                    {
                         data.Add(price);
                     }
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Notes.Text = ex.Message;
             }
@@ -90,43 +123,6 @@ namespace StockAnalyzer.Windows
             
 
             return data.Take(5);
-        }
-
-
-
-
-
-
-
-
-
-
-
-
-
-        private static Task<List<string>> 
-            SearchForStocks(CancellationToken cancellationToken)
-        {
-            return Task.Run(async () =>
-            {
-                using (var stream = new StreamReader(File.OpenRead("StockPrices_Small.csv")))
-                {
-                    var lines = new List<string>();
-
-                    string line;
-                    while ((line = await stream.ReadLineAsync()) != null)
-                    {
-                        if(cancellationToken.IsCancellationRequested)
-                        {
-                            break;
-                        }
-
-                        lines.Add(line);
-                    }
-
-                    return lines;
-                }
-            }, cancellationToken);
         }
 
         private async Task GetStocks()
