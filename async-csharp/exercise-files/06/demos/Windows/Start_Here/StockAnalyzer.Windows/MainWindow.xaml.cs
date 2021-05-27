@@ -33,20 +33,15 @@ namespace StockAnalyzer.Windows
 
 
 
-
         private async void Search_Click(object sender, RoutedEventArgs e)
         {
             try
             {
                 BeforeLoadingStockData();
-                var progress = new Progress<IEnumerable<StockPrice>>();
-                progress.ProgressChanged += (_, stocks) => // First parameter is the sender
-                {
-                    StockProgress.Value += 1;
-                    Notes.Text += $"Loaded {stocks.Count()} for {stocks.First().Identifier}{Environment.NewLine}";
-                };
 
-                await SearchForStocks(progress);
+                var data = await SearchForStocks();
+
+                Stocks.ItemsSource = data.Where(price => price.Identifier == StockIdentifier.Text);
             }
             catch(Exception ex)
             {
@@ -59,30 +54,25 @@ namespace StockAnalyzer.Windows
         }
 
 
-        private async Task SearchForStocks(IProgress<IEnumerable<StockPrice>> progress)
+        private static Task<IEnumerable<StockPrice>> SearchForStocks()
         {
-            var service = new StockService();
-            var loadingTasks = new List<Task<IEnumerable<StockPrice>>>();
-
-            foreach(var identifier in StockIdentifier.Text.Split(' ', ','))
+            var tcs = new TaskCompletionSource<IEnumerable<StockPrice>>(TaskCreationOptions.RunContinuationsAsynchronously);
+            
+            ThreadPool.QueueUserWorkItem(_ =>
             {
-                var loadTask = service.GetStockPricesFor(identifier,
-                    CancellationToken.None);
+                var lines = File.ReadAllLines("StockPrices_Small.csv");
 
-                loadTask = loadTask.ContinueWith(completedTask =>
+                var prices = new List<StockPrice>();
+
+                foreach (var line in lines.Skip(1))
                 {
-                    progress?.Report(completedTask.Result);
+                    prices.Add(StockPrice.FromCSV(line));
+                }
 
-                    return completedTask.Result;
-                });
+                tcs.SetResult(prices);
+            });
 
-                loadingTasks.Add(loadTask);
-            }
-
-            var data = await Task.WhenAll(loadingTasks);
-
-            Stocks.ItemsSource = data.SelectMany(stock => stock);
-
+            return tcs.Task;
         }
 
         private static Task<List<string>> 
@@ -159,9 +149,7 @@ namespace StockAnalyzer.Windows
         {
             stopwatch.Restart();
             StockProgress.Visibility = Visibility.Visible;
-            StockProgress.IsIndeterminate = false;
-            StockProgress.Value = 0;
-            StockProgress.Maximum = StockIdentifier.Text.Split(' ', ',').Length;
+            StockProgress.IsIndeterminate = true;
         }
 
         private void AfterLoadingStockData()
