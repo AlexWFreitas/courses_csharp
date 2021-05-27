@@ -24,6 +24,8 @@ namespace StockAnalyzer.AttachedDetached
                 return "PluralSight!";
             });
 
+            var result = await await Task1; // Double await!
+
             Task<string> UnwrappedTask = Task.Factory.StartNew(async () =>
             {
                 await Task.Delay(2000);
@@ -67,7 +69,34 @@ namespace StockAnalyzer.AttachedDetached
             });
 
             Console.WriteLine("Completed");
-            Console.ReadLine();
+
+
+
+            // Codigo para questão sobre closure
+            // Closure - Compilador vai gerar código para eu poder usar a variavel texto como se a Task
+            // e a variavel closure estivessem dentro do mesmo escopo.
+            // Como se existisse um objeto que contivesse tanto a Task e seu delegate quanto a variável texto.
+
+            var texto = "textotextotexto";
+
+            var task = Task.Run(() =>
+            {
+                Console.WriteLine(texto);
+            });
+
+            // Representação do Closure Gerado
+            var ObjetoClosure1 = new ExemploClosure();
+            ObjetoClosure1.texto = "textotextotexto2";
+            ObjetoClosure1.task = Task.Run(() =>
+            {
+                Console.WriteLine(ObjetoClosure1.texto);
+            });
+        }
+
+        public class ExemploClosure
+        {
+            public string texto;
+            public Task task;
         }
     }
 }
