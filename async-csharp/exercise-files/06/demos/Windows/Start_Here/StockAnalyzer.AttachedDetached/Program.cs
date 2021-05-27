@@ -52,10 +52,6 @@ namespace StockAnalyzer.AttachedDetached
                 return "PluralSight!";
             });
 
-            var resultTask2 = await Task2;
-            Console.WriteLine(resultTask2);
-
-
             Task<string> Task4 = Task.Run(() =>
             {
                 Thread.Sleep(2000);
