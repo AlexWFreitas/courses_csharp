@@ -1,4 +1,5 @@
 ﻿using PersonRepository.Interface;
+using PersonRepository.Service;
 using System.Windows;
 
 namespace PeopleViewer
@@ -12,7 +13,9 @@ namespace PeopleViewer
 
         private void ServiceFetchButton_Click(object sender, RoutedEventArgs e)
         {
+            ClearListBox();
 
+            IPersonRepository repository = new ServiceRepository();
         }
 
         private void CSVFetchButton_Click(object sender, RoutedEventArgs e)
