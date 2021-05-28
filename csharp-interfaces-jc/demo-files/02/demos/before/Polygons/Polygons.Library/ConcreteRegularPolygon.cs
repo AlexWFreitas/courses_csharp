@@ -4,8 +4,13 @@ namespace Polygons.Library
 {
     public class ConcreteRegularPolygon
     {
-        public int NumberOfSides { get; set; }
-        public int SideLength { get; set; }
+        private int _sideLength;                // Backing field for the Full Property
+        public int NumberOfSides { get; set; }  // Automatic Property ( Automatically generates the backing field )
+        public int SideLength                   // Full property ( Custom getter and setter )
+        {
+            get { return _sideLength; }
+            set { _sideLength = value; }
+        }
 
         public ConcreteRegularPolygon(int sides, int length)
         {

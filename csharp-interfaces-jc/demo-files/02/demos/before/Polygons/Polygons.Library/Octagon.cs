@@ -2,7 +2,7 @@
 
 namespace Polygons.Library
 {
-    public class Octagon : IRegularPolygon
+    public class Octagon : Object, IRegularPolygon
     {
         public int NumberOfSides { get; set; }
         public int SideLength { get; set; }
