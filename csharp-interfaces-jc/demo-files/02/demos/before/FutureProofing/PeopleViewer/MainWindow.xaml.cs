@@ -16,12 +16,14 @@ namespace PeopleViewer
 
         private void ConcreteFetchButton_Click(object sender, RoutedEventArgs e)
         {
-
+            List<Person> people = repository.GetPeople();
+            PersonListBox.ItemsSource = people;
         }
 
         private void AbstractFetchButton_Click(object sender, RoutedEventArgs e)
         {
-
+            IEnumerable<Person> people = repository.GetPeople();
+            PersonListBox.ItemsSource = people;
         }
 
         private void ClearButton_Click(object sender, RoutedEventArgs e)
@@ -31,7 +33,7 @@ namespace PeopleViewer
 
         private void ClearListBox()
         {
-            PersonListBox.Items.Clear();
+            PersonListBox.ItemsSource = null;
         }
     }
 }
