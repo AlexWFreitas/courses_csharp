@@ -41,7 +41,7 @@ namespace PeopleViewer
             get { return repository.GetType().ToString(); }
         }
 
-        #region INotifyPropertyChanged Members
+        #region INotifyPropertyChanged Members - Event for Data Binding [?]
 
         public event PropertyChangedEventHandler PropertyChanged;
         private void RaisePropertyChanged([CallerMemberName] string propertyName = null)
