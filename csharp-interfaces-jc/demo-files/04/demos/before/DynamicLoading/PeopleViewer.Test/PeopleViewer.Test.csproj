@@ -60,10 +60,17 @@
       <Project>{113c3648-8220-4227-8bc8-8003bfe5022a}</Project>
       <Name>PeopleViewer.Layered</Name>
     </ProjectReference>
+    <ProjectReference Include="..\PersonRepository.Fake\PersonRepository.Fake.csproj">
+      <Project>{e3be28ad-5f76-4f76-bcc3-e9f6f9c64e00}</Project>
+      <Name>PersonRepository.Fake</Name>
+    </ProjectReference>
     <ProjectReference Include="..\PersonRepository.Interface\PersonRepository.Interface.csproj">
       <Project>{97b4a8a4-2354-4ce7-8bff-435a1406e97e}</Project>
       <Name>PersonRepository.Interface</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
