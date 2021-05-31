@@ -214,6 +214,10 @@
       <Project>{ef9bde29-0061-4572-b552-4f352292642c}</Project>
       <Name>PersonRepository.CSV</Name>
     </ProjectReference>
+    <ProjectReference Include="..\PersonRepository.Factory\PersonRepository.Factory.csproj">
+      <Project>{366c86ef-adad-4412-93cb-5664f643c293}</Project>
+      <Name>PersonRepository.Factory</Name>
+    </ProjectReference>
     <ProjectReference Include="..\PersonRepository.Interface\PersonRepository.Interface.csproj">
       <Project>{ef1d5215-e99b-4fe7-abc3-bd748f75780c}</Project>
       <Name>PersonRepository.Interface</Name>
