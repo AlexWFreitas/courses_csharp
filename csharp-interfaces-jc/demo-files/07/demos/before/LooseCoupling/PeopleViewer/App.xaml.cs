@@ -12,7 +12,9 @@ namespace PeopleViewer
         {
             base.OnStartup(e);
 
-            // Application.Current.MainWindow = 
+            var repository = new ServiceRepository();
+            var viewModel = new PeopleViewModel(repository);
+            Application.Current.MainWindow = new MainWindow(viewModel);
 
             Application.Current.MainWindow.Show();
         }
