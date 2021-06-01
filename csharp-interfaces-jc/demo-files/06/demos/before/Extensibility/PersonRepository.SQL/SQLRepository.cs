@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace PersonRepository.SQL
 {
-    public class SQLRepository : IPersonRepository
+    public class SQLRepository : IPersonReader
     {
         DbContextOptions<PersonContext> options;
 

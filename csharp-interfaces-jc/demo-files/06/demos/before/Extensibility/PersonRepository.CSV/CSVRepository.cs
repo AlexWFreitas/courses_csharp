@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace PersonRepository.CSV
 {
-    public class CSVRepository : IPersonRepository
+    public class CSVRepository : IPersonReader
     {
         string path;
 
@@ -48,21 +48,6 @@ namespace PersonRepository.CSV
         public Person GetPerson(int id)
         {
             return GetPeople().FirstOrDefault(p => p.Id == id);
-        }
-
-        public void AddPerson(Person newPerson)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void UpdatePerson(int id, Person updatedPerson)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void DeletePerson(int id)
-        {
-            throw new NotImplementedException();
         }
     }
 }
