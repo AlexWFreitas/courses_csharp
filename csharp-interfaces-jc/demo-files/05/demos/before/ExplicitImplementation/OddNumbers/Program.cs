@@ -8,9 +8,15 @@ namespace OddNumbers
         {
             Console.WriteLine ("Odd Numbers:");
 
+            var generator = new OddGenerator();
+            foreach (var odd in generator)
+            {
+                if (odd > 50)
+                    break;
+                Console.WriteLine(odd);
+            }
+
             Console.Read();
-
-
         }
     }
 }
