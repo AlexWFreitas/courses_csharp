@@ -11,7 +11,11 @@ namespace PeopleViewer.Presentation.Tests
     {
         private IPersonRepository GetTestRepository()
         {
-            return new FakeRepository();
+            List<Person> testPeople = TestData.testPeople;
+            Mock<IPersonRepository> mockRepo = new Mock<IPersonRepository>();
+
+            mockRepo.Setup(m => m.GetPeople()).Returns(testPeople);     
+            return mockRepo.Object;                // Returns IPersonRepository instead of Mock<IPersonRepository>
         }
 
         [Test]
