@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27703.2035
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31229.75
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "Common\Common.csproj", "{1B82B92C-6693-4922-AE9A-9CACB5C4E24F}"
 EndProject
@@ -32,6 +32,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PeopleViewer.Ninject", "PeopleViewer.Ninject\PeopleViewer.Ninject.csproj", "{A8F28521-413D-4E59-82AD-24C6D2B1DA4B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PersonRepository.Caching", "PersonRepository.Caching\PersonRepository.Caching.csproj", "{C2BD0B30-16F2-4B5B-9CC8-6BB192EDCAB8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sandbox", "Sandbox", "{449B9E69-E3BB-4406-B4E6-EDA6D53A1626}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DecoratorPatternExample", "..\..\..\..\..\..\..\csharp-examples\Design Patterns\Decorator Pattern\DecoratorPatternExample\DecoratorPatternExample.csproj", "{5D3BBBB9-7057-44F6-88B9-285E60E47F56}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -75,6 +79,10 @@ Global
 		{C2BD0B30-16F2-4B5B-9CC8-6BB192EDCAB8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C2BD0B30-16F2-4B5B-9CC8-6BB192EDCAB8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C2BD0B30-16F2-4B5B-9CC8-6BB192EDCAB8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5D3BBBB9-7057-44F6-88B9-285E60E47F56}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5D3BBBB9-7057-44F6-88B9-285E60E47F56}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5D3BBBB9-7057-44F6-88B9-285E60E47F56}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5D3BBBB9-7057-44F6-88B9-285E60E47F56}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -89,6 +97,7 @@ Global
 		{8BB096F4-1DB0-4038-BA69-A4F75406D336} = {AC3CFB83-BBF1-4AFD-ADEE-87DCA241A885}
 		{A8F28521-413D-4E59-82AD-24C6D2B1DA4B} = {DB58D260-0DDF-45D3-9A65-9D0464733819}
 		{C2BD0B30-16F2-4B5B-9CC8-6BB192EDCAB8} = {A7B96D7E-CCC5-42B8-964F-D87FE42B0074}
+		{5D3BBBB9-7057-44F6-88B9-285E60E47F56} = {449B9E69-E3BB-4406-B4E6-EDA6D53A1626}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {62280A51-57F7-4AEB-B108-3A00B1574DEA}
