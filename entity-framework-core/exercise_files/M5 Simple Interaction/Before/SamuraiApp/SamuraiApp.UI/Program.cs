@@ -54,8 +54,8 @@ namespace SamuraiApp.UI
         }
         private static void QueryFilters()
         {
-            var name = "Sampson";
-            var samurais = _context.Samurais.Where(s => s.Name == name).ToList();
+            var filter = "J%";
+            var samurais = _context.Samurais.Where(s => EF.Functions.Like(s.Name, filter)).ToList();
         }
     }
 }
