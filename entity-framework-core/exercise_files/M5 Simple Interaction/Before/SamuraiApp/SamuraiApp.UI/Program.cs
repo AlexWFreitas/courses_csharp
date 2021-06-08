@@ -3,12 +3,14 @@ using SamuraiApp.Domain;
 using System;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 
 namespace SamuraiApp.UI
 {
     class Program
     {
         private static SamuraiContext _context = new SamuraiContext();
+        private static SamuraiContextNoTracking _contextNT = new SamuraiContextNoTracking();
 
         private static void Main(string[] args)
         {
@@ -19,7 +21,8 @@ namespace SamuraiApp.UI
             // RetrieveAndUpdateMultipleSamurais();
             // GetSamurais();
             // MultipleDatabaseOperations();
-            RetrieveAndDeleteSamurai();
+            // RetrieveAndDeleteSamurai();
+            QueryAndUpdateBattles_Disconnected();
             Console.Write("Press any key...");
             Console.ReadKey();
         }
@@ -93,6 +96,27 @@ namespace SamuraiApp.UI
             var samurai = _context.Samurais.Find(1);
             _context.Samurais.Remove(samurai);
             _context.SaveChanges();
+        }
+        private static void QueryAndUpdateBattles_Disconnected()
+        {
+            List<Battle> disconnectedBattles;
+
+            using (var context1 = new SamuraiContext())
+            {
+                disconnectedBattles = _context.Battles.ToList();
+            } // context1 is disposed after retrieving the data
+
+            disconnectedBattles.ForEach(b =>
+                {
+                    b.StartDate = new DateTime(1570, 01, 01);
+                    b.EndDate = new DateTime(1570, 12, 1);
+                });
+
+            using (var context2 = new SamuraiContext())
+            {
+                context2.UpdateRange(disconnectedBattles);
+                context2.SaveChanges();
+            }
         }
     }
 }
