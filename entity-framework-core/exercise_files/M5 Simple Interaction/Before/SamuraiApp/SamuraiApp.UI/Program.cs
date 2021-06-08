@@ -14,9 +14,12 @@ namespace SamuraiApp.UI
         {
             // _context.Database.EnsureCreated();
             // AddSamurais("Shimada", "Okamoto","Kikuchio", "Hayashida" );
-            // GetSamurais();
             // AddVariousTypes();
-            QueryFind(2);
+            // QueryFind(2);
+            // RetrieveAndUpdateMultipleSamurais();
+            // GetSamurais();
+            // MultipleDatabaseOperations();
+            RetrieveAndDeleteSamurai();
             Console.Write("Press any key...");
             Console.ReadKey();
         }
@@ -66,6 +69,30 @@ namespace SamuraiApp.UI
         {
             var samurai = _context.Samurais.Find(key);
         }
-
+        private static void RetrieveAndUpdateSamurai()
+        {
+            var samurai = _context.Samurais.FirstOrDefault();
+            samurai.Name += "San";
+            _context.SaveChanges();
+        }
+        private static void RetrieveAndUpdateMultipleSamurais()
+        {
+            var samurais = _context.Samurais.Skip(1).Take(4).ToList();
+            samurais.ForEach(s => s.Name += "-San");
+            _context.SaveChanges();
+        }
+        private static void MultipleDatabaseOperations()
+        {
+            var samurai = _context.Samurais.FirstOrDefault();
+            samurai.Name += "San";
+            _context.Samurais.Add(new Samurai { Name = "Shino" });
+            _context.SaveChanges();
+        }
+        private static void RetrieveAndDeleteSamurai()
+        {
+            var samurai = _context.Samurais.Find(1);
+            _context.Samurais.Remove(samurai);
+            _context.SaveChanges();
+        }
     }
 }
