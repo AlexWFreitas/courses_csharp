@@ -12,13 +12,23 @@ namespace SamuraiApp.UI
 
         private static void Main(string[] args)
         {
-            AddSamurais("Julie", "Sampson" );
-            GetSamurais();
+            // _context.Database.EnsureCreated();
+            // AddSamurais("Shimada", "Okamoto","Kikuchio", "Hayashida" );
+            // GetSamurais();
+            // AddVariousTypes();
+            QueryFilters();
             Console.Write("Press any key...");
             Console.ReadKey();
         }
-
-        private static void AddSamurais(params string[] names)
+        private static void AddVariousTypes()
+        {
+            _context.AddRange(new Samurai { Name = "Shimada" },
+                                new Samurai { Name = "Okamoto" },
+                                new Battle { Name = "Battle of Anegawa" },
+                                new Battle { Name = "Battle of Nagashino" });
+            _context.SaveChanges();
+        }
+        private static void AddSamuraisByName(params string[] names)
         {
             foreach (string name in names)
             {
@@ -26,7 +36,11 @@ namespace SamuraiApp.UI
             }
             _context.SaveChanges();
         }
-
+        private static void AddSamurais(Samurai[] samurais)
+        {
+            _context.Samurais.AddRange(samurais);
+            _context.SaveChanges();
+        }
         private static void GetSamurais()
         {
             var samurais = _context.Samurais
@@ -37,6 +51,11 @@ namespace SamuraiApp.UI
             {
                 Console.WriteLine(samurai.Name);
             }
+        }
+        private static void QueryFilters()
+        {
+            var name = "Sampson";
+            var samurais = _context.Samurais.Where(s => s.Name == name).ToList();
         }
     }
 }
